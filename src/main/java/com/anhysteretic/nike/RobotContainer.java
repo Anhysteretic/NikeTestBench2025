@@ -7,6 +7,10 @@ import com.anhysteretic.nike.drivetrain.Drivetrain;
 import com.anhysteretic.nike.drivetrain.Snapping;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,6 +35,8 @@ public class RobotContainer {
 
   public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
 
+  public final ChassisSpeeds testSpeeds = new ChassisSpeeds(MaxSpeed/2, 0, 0);
+
   public RobotContainer() {
     configureBindings();
   }
@@ -43,16 +49,19 @@ public class RobotContainer {
             () ->
                 drive
                     .withVelocityX(
-                        joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                        -joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(
-                        joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(
                         -joystick.getRightX()
                             * MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
-    this.joystick.rightBumper().whileTrue(new Snapping(drivetrain, true));
-    this.joystick.leftBumper().whileTrue(new Snapping(drivetrain, false));
+    joystick.a().whileTrue(new RunCommand(() -> drivetrain.setControl(drivetrain.test.withSpeeds(testSpeeds)), drivetrain));
+
+
+//    this.joystick.rightBumper().whileTrue(new Snapping(drivetrain, true));
+//    this.joystick.leftBumper().whileTrue(new Snapping(drivetrain, false));
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
