@@ -226,6 +226,8 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             if (poseEstimate == null) {
                 return;
             }
+            LimelightHelpers.SetRobotOrientation(
+                    RC.Limelights.front, this.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
             if (poseEstimate.tagCount >= 2) {
                 this.setVisionMeasurementStdDevs(this.stdDevsVisionMT2);
                 var pose = new Pose2d(poseEstimate.pose.getTranslation(), new Rotation2d(poseEstimate.pose.getRotation().getRadians() + Math.PI));
