@@ -60,7 +60,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
 
     public boolean hasSeeded = false;
     Matrix<N3, N1> stdDevsVisionMT1 = VecBuilder.fill(0.7, 0.7, Math.PI);
-    Matrix<N3, N1> stdDevsVisionMT2 = VecBuilder.fill(0.7, 0.7, 2*Math.PI);
+    Matrix<N3, N1> stdDevsVisionMT2 = VecBuilder.fill(0.6, 0.6, 9999999);
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable networkTablePoses = inst.getTable("Drivetrain Poses");
@@ -210,30 +210,34 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             }
 
             if (poseEstimate.tagCount >= 2) {
-                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT1);
+//                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT1);
                 // remember to unflip for nemo
-                var pose = new Pose2d(poseEstimate.pose.getTranslation(), new Rotation2d(poseEstimate.pose.getRotation().getRadians() + Math.PI));
-                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
+                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
+//                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
                 LimelightHelpers.SetRobotOrientation(
                         RC.Limelights.front, poseEstimate.pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
                 if (!hasSeeded) {
                     this.hasSeeded = true;
                 }
             }
+
         } else {
             LimelightHelpers.PoseEstimate poseEstimate =
                     LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
             if (poseEstimate == null) {
                 return;
             }
-            LimelightHelpers.SetRobotOrientation(
-                    RC.Limelights.front, this.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+//            LimelightHelpers.SetRobotOrientation(
+//                    RC.Limelights.front, this.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+            LimelightHelpers.SetIMUMode(RC.Limelights.front, 2);
             if (poseEstimate.tagCount >= 2) {
-                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT2);
-                var pose = new Pose2d(poseEstimate.pose.getTranslation(), new Rotation2d(poseEstimate.pose.getRotation().getRadians() + Math.PI));
-                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
+//                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT2);
+//                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
+//                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
             }
         }
+
+        SmartDashboard.putBoolean("Has seeded", this.hasSeeded);
 
         var one = LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
         var two = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
