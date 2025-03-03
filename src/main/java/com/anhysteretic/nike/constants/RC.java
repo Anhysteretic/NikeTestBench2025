@@ -16,8 +16,10 @@ public class RC {
   public static final CANBus kCANBus = new CANBus("canivore2", "./logs/example.hoot");
 
   public class Limelights {
-    public static String front = "limelight-charlie";
-    public static String back = "limelight-gamma";
+    public static String frontName = "limelight-charlie";
+    public static String backName = "limelight-gamma";
+    // x y z roll pitch yaw
+    public static double[] frontPose = { 0.0, 0.0, 0.25, 0.0, 0.0, 0.0 };
   }
 
   public enum RunType {

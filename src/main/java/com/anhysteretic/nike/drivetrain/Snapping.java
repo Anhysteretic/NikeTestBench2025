@@ -1,6 +1,6 @@
 package com.anhysteretic.nike.drivetrain;
 
-import com.anhysteretic.nike.LimelightHelpers;
+import com.anhysteretic.nike.lib.limelight.LimelightHelpers;
 import com.anhysteretic.nike.constants.RC;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
