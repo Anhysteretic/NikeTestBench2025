@@ -1,8 +1,9 @@
 package com.anhysteretic.nike.vision;
 
-import com.anhysteretic.nike.vision.lib254.FiducialObservation;
-import com.anhysteretic.nike.vision.lib254.MegatagPoseEstimate;
 import org.littletonrobotics.junction.AutoLog;
+
+import com.team254.vision.FiducialObservation;
+import com.team254.vision.MegatagPoseEstimate;
 
 public interface VisionIO {
     @AutoLog

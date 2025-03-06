@@ -1,4 +1,4 @@
-package com.anhysteretic.nike.vision.lib254;
+package com.team254.vision;
 
 import java.nio.ByteBuffer;
 

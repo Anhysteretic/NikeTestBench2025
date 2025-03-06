@@ -1,4 +1,4 @@
-package com.anhysteretic.nike.vision.lib254;
+package com.team254.vision;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
