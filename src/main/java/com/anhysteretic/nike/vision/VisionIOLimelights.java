@@ -1,31 +1,27 @@
 package com.anhysteretic.nike.vision;
 
-import com.anhysteretic.nike.RobotState;
 import com.anhysteretic.nike.constants.RC;
 import com.anhysteretic.nike.lib.limelight.LimelightHelpers;
 import com.team254.vision.FiducialObservation;
 import com.team254.vision.MegatagPoseEstimate;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class VisionIOLimelights implements VisionIO{
     NetworkTable charlieTable = NetworkTableInstance.getDefault().getTable(RC.Limelights.frontName);
 
-    RobotState robotState;
+    VisionIOInputs inputCache = new VisionIOInputs();
 
-    public VisionIOLimelights(RobotState robotState) {
-        this.robotState = robotState;
+    public VisionIOLimelights() {
         setLLSettings();
     }
 
     private void setLLSettings() {
         charlieTable.getEntry("camerapose_robotspace_set").setDoubleArray(RC.Limelights.frontPose);
 
-        var gyroAngle = robotState.getLatestFieldToRobot().getValue().getRotation();
-        var gyroAngularVelocity = Units
-                .radiansToDegrees(robotState.getLatestRobotRelativeChassisSpeed().omegaRadiansPerSecond);
+        var gyroAngle = inputCache.gyroAngle;
+        var gyroAngularVelocity = inputCache.gyroAngularVelocity;
         LimelightHelpers.SetRobotOrientation(RC.Limelights.frontName, gyroAngle.getDegrees(),
                 gyroAngularVelocity, 0, 0, 0, 0);
     }
@@ -43,6 +39,7 @@ public class VisionIOLimelights implements VisionIO{
             inputs.charlieFiducialObservations = FiducialObservation.fromLimelight(megatag.rawFiducials);
         }
 
+        this.inputCache = inputs;
         setLLSettings();
     }
 

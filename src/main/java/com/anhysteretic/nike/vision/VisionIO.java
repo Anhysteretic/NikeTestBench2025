@@ -1,5 +1,6 @@
 package com.anhysteretic.nike.vision;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
 import com.team254.vision.FiducialObservation;
@@ -17,6 +18,9 @@ public interface VisionIO {
         public int charlieMegatagCount;
 
         public MegatagPoseEstimate charlieMegatag2PoseEstimates;
+
+        public Rotation2d gyroAngle;
+        public double gyroAngularVelocity;
     }
 
     void updateInputs(VisionIOInputs inputs);

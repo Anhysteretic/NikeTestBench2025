@@ -11,6 +11,8 @@ public class RC {
         return alliance.filter(value -> value == DriverStation.Alliance.Red).isPresent();
       };
 
+  public final static double LOOKBACK_TIME = 1.0;
+
   public static final RunType robotType = RunType.COMP;
 
   public static final CANBus kCANBus = new CANBus("canivore2", "./logs/example.hoot");
