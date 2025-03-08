@@ -5,8 +5,12 @@ import static edu.wpi.first.units.Units.*;
 import com.anhysteretic.nike.constants.TunerConstants;
 import com.anhysteretic.nike.drivetrain.Drivetrain;
 import com.anhysteretic.nike.drivetrain.Snapping;
+import com.anhysteretic.nike.vision.Vision;
+import com.anhysteretic.nike.vision.VisionIO;
+import com.anhysteretic.nike.vision.VisionIOLimelights;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.team254.vision.VisionFieldPoseEstimate;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -14,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
+import java.util.function.Consumer;
 
 public class RobotContainer {
   private double MaxSpeed =
@@ -35,9 +41,21 @@ public class RobotContainer {
 
   public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
 
+  public final VisionIO visionIO;
+  public final Vision vision;
+
   public final ChassisSpeeds testSpeeds = new ChassisSpeeds(MaxSpeed/2, 0, 0);
 
+  public final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer = new Consumer<VisionFieldPoseEstimate>(){
+    @Override
+    public void accept(VisionFieldPoseEstimate visionFieldPoseEstimate) {
+      drivetrain.addVisionMeasurement(visionFieldPoseEstimate);
+    }
+  };
+
   public RobotContainer() {
+    this.visionIO = new VisionIOLimelights();
+    this.vision = new Vision(visionIO, visionEstimateConsumer, drivetrain);
     configureBindings();
   }
 

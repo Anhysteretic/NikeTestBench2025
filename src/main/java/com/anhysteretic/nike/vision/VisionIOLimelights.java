@@ -22,8 +22,12 @@ public class VisionIOLimelights implements VisionIO{
 
         var gyroAngle = inputCache.gyroAngle;
         var gyroAngularVelocity = inputCache.gyroAngularVelocity;
-        LimelightHelpers.SetRobotOrientation(RC.Limelights.frontName, gyroAngle.getDegrees(),
-                gyroAngularVelocity, 0, 0, 0, 0);
+        try {
+            LimelightHelpers.SetRobotOrientation(RC.Limelights.frontName, gyroAngle.getDegrees(),
+                    gyroAngularVelocity, 0, 0, 0, 0);
+        } catch (Exception e){
+            return;
+        }
     }
 
     @Override
@@ -32,6 +36,9 @@ public class VisionIOLimelights implements VisionIO{
         if (inputs.charlieSeesTarget){
             var megatag = LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.frontName);
             var megatag2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.frontName);
+            if (megatag2 == null || megatag == null){
+                return;
+            }
 
             inputs.charlieMegatagPoseEstimate = MegatagPoseEstimate.fromLimelight(megatag);
             inputs.charlieMegatagCount = megatag.tagCount;

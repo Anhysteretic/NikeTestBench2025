@@ -21,7 +21,7 @@ public class RC {
     public static String frontName = "limelight-charlie";
     public static String backName = "limelight-gamma";
     // x y z roll pitch yaw
-    public static double[] frontPose = { 0.0, 0.0, 0.25, 0.0, 0.0, 0.0 };
+    public static double[] frontPose = { 0.0, 0.0, 0.25, 180, 0.0, 0.0 };
   }
 
   public enum RunType {

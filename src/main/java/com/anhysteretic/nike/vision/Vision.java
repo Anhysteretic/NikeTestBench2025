@@ -1,5 +1,6 @@
 package com.anhysteretic.nike.vision;
 
+import com.anhysteretic.nike.drivetrain.Drivetrain;
 import com.team254.lib.ConcurrentTimeInterpolatableBuffer;
 import com.team254.vision.FiducialObservation;
 import com.team254.vision.MegatagPoseEstimate;
@@ -11,6 +12,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,7 +29,6 @@ import static com.anhysteretic.nike.constants.RC.LOOKBACK_TIME;
 
 public class Vision extends SubsystemBase {
     private final VisionIO io;
-
 
     private final VisionIOInputsAutoLogged inputs = new VisionIOInputsAutoLogged();
 
@@ -47,16 +50,32 @@ public class Vision extends SubsystemBase {
     private ConcurrentTimeInterpolatableBuffer<Double> driveYawAngularVelocity = ConcurrentTimeInterpolatableBuffer
             .createDoubleBuffer(LOOKBACK_TIME);
 
-    public Vision(VisionIO io, Consumer<VisionFieldPoseEstimate> visionEstimateConsumer) {
+//    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+//    NetworkTable networkTablePoses = inst.getTable("Drivetrain Poses");
+//
+//    StructPublisher<Pose2d> mt1 =
+//            networkTablePoses.getStructTopic("Megatag 1", Pose2d.struct).publish();
+//    StructPublisher<Pose2d> mt2 =
+//            networkTablePoses.getStructTopic("Megatag 2", Pose2d.struct).publish();
+//    StructPublisher<Pose2d> ctre = networkTablePoses.getStructTopic("CTRE", Pose2d.struct).publish();
+
+    private Drivetrain drivetrain;
+
+    public Vision(VisionIO io, Consumer<VisionFieldPoseEstimate> visionEstimateConsumer, Drivetrain drivetrain) {
         this.io = io;
         this.visionEstimateConsumer = visionEstimateConsumer;
         robotPose.addSample(0.0, Pose2d.kZero);
         driveYawAngularVelocity.addSample(0.0, 0.0);
+        this.drivetrain = drivetrain;
     }
 
     @Override
     public void periodic() {
         double timestamp = Timer.getTimestamp();
+        Drivetrain.VisionData visionData = this.drivetrain.getVisionData();
+        this.driveYawAngularVelocity.addSample(timestamp, visionData.yawRadsPers);
+        this.measuredRobotRelativeChassisSpeeds.set(visionData.measuredRobotRelativeChassisSpeeds);
+        this.robotPose.addSample(timestamp, visionData.robotPose);
         this.inputs.gyroAngle = getLatestFieldToRobot().getValue().getRotation();
         this.inputs.gyroAngularVelocity = Units.radiansToDegrees(getLatestRobotRelativeChassisSpeed().omegaRadiansPerSecond);
         io.updateInputs(this.inputs);
