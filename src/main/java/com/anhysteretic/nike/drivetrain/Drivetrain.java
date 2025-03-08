@@ -1,11 +1,10 @@
 package com.anhysteretic.nike.drivetrain;
 
-import static edu.wpi.first.units.Units.*;
-
-import com.anhysteretic.nike.LimelightHelpers;
+import com.anhysteretic.nike.lib.limelight.LimelightHelpers;
 import com.anhysteretic.nike.constants.RC;
 import com.anhysteretic.nike.constants.TunerConstants.TunerSwerveDrivetrain;
-import com.ctre.phoenix6.SignalLogger;
+import com.anhysteretic.nike.vision.Vision;
+import com.anhysteretic.nike.vision.VisionIO;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -14,17 +13,18 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.team254.vision.VisionFieldPoseEstimate;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -32,8 +32,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -190,67 +188,22 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     @Override
     public void periodic() {
 
-        if (DriverStation.isDisabled()) {
-            if (!m_hasAppliedOperatorPerspective) {
-                DriverStation.getAlliance()
-                        .ifPresent(
-                                allianceColor -> {
-                                    setOperatorPerspectiveForward(
-                                            allianceColor == Alliance.Red
-                                                    ? kRedAlliancePerspectiveRotation
-                                                    : kBlueAlliancePerspectiveRotation);
-                                    m_hasAppliedOperatorPerspective = true;
-                                });
-            }
+         if (DriverStation.isDisabled()) {
+             if (!m_hasAppliedOperatorPerspective) {
+                 DriverStation.getAlliance()
+                         .ifPresent(
+                                 allianceColor -> {
+                                     setOperatorPerspectiveForward(
+                                             allianceColor == Alliance.Red
+                                                     ? kRedAlliancePerspectiveRotation
+                                                     : kBlueAlliancePerspectiveRotation);
+                                     m_hasAppliedOperatorPerspective = true;
+                                 });
+             }
+         }
 
-            LimelightHelpers.PoseEstimate poseEstimate =
-                    LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
-            if (poseEstimate == null) {
-                return;
-            }
 
-            if (poseEstimate.tagCount >= 2) {
-//                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT1);
-                // remember to unflip for nemo
-                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
-//                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
-                LimelightHelpers.SetRobotOrientation(
-                        RC.Limelights.front, poseEstimate.pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-                if (!hasSeeded) {
-                    this.hasSeeded = true;
-                }
-            }
-
-        } else {
-            LimelightHelpers.PoseEstimate poseEstimate =
-                    LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
-            if (poseEstimate == null) {
-                return;
-            }
-//            LimelightHelpers.SetRobotOrientation(
-//                    RC.Limelights.front, this.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-            LimelightHelpers.SetIMUMode(RC.Limelights.front, 2);
-            if (poseEstimate.tagCount >= 2) {
-//                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT2);
-//                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
-//                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
-            }
-        }
-
-        SmartDashboard.putBoolean("Has seeded", this.hasSeeded);
-
-        var one = LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
-        var two = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
-        if (one != null) {
-            this.mt1.set(one.pose);
-        }
-        if (two != null) {
-            this.mt2.set(two.pose);
-        }
-        this.ctre.set(this.getState().Pose);
-
-        SmartDashboard.putNumber("TargetSpeed", test.Speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("current speed", this.getState().Speeds.vxMetersPerSecond);
+         ctre.set(this.getState().Pose);
     }
 
     private void startSimThread() {
@@ -304,6 +257,36 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
                 visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
 
+    public void addVisionMeasurement(VisionFieldPoseEstimate estimate){
+        if (estimate.getVisionMeasurementStdDevs() == null) {
+            addVisionMeasurement(estimate.getVisionRobotPoseMeters(), estimate.getTimestampSeconds());
+        } else {
+            addVisionMeasurement(estimate.getVisionRobotPoseMeters(), estimate.getTimestampSeconds(), estimate.getVisionMeasurementStdDevs());
+        }
+    }
+
     public SwerveRequest.ApplyRobotSpeeds test = new SwerveRequest.ApplyRobotSpeeds();
 
+    public VisionData getVisionData(){
+        var visionData = new VisionData();
+        visionData.robotPose = this.getState().Pose;
+        visionData.gyroRotation = this.getState().Pose.getRotation();
+        visionData.measuredRobotRelativeChassisSpeeds = this.getState().Speeds;
+//        visionData.measuredFieldRelativeChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(visionData.measuredRobotRelativeChassisSpeeds, visionData.gyroRotation);
+
+        visionData.yawRadsPers = this.getState().Speeds.omegaRadiansPerSecond;
+        return visionData;
+
+
+    }
+
+    public static class VisionData{
+        public Pose2d robotPose;
+        public Rotation2d gyroRotation;
+        public ChassisSpeeds measuredRobotRelativeChassisSpeeds;
+//        public ChassisSpeeds measuredFieldRelativeChassisSpeeds;
+//        public ChassisSpeeds desiredFieldRelativeChassisSpeeds;
+        public double yawRadsPers;
+
+    }
 }
