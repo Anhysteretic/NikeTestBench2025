@@ -184,67 +184,67 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     @Override
     public void periodic() {
 
-        if (DriverStation.isDisabled()) {
-            if (!m_hasAppliedOperatorPerspective) {
-                DriverStation.getAlliance()
-                        .ifPresent(
-                                allianceColor -> {
-                                    setOperatorPerspectiveForward(
-                                            allianceColor == Alliance.Red
-                                                    ? kRedAlliancePerspectiveRotation
-                                                    : kBlueAlliancePerspectiveRotation);
-                                    m_hasAppliedOperatorPerspective = true;
-                                });
-            }
+//         if (DriverStation.isDisabled()) {
+//             if (!m_hasAppliedOperatorPerspective) {
+//                 DriverStation.getAlliance()
+//                         .ifPresent(
+//                                 allianceColor -> {
+//                                     setOperatorPerspectiveForward(
+//                                             allianceColor == Alliance.Red
+//                                                     ? kRedAlliancePerspectiveRotation
+//                                                     : kBlueAlliancePerspectiveRotation);
+//                                     m_hasAppliedOperatorPerspective = true;
+//                                 });
+//             }
 
-            LimelightHelpers.PoseEstimate poseEstimate =
-                    LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
-            if (poseEstimate == null) {
-                return;
-            }
+//             LimelightHelpers.PoseEstimate poseEstimate =
+//                     LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
+//             if (poseEstimate == null) {
+//                 return;
+//             }
 
-            if (poseEstimate.tagCount >= 2) {
-//                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT1);
-                // remember to unflip for nemo
-                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
-//                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
-                LimelightHelpers.SetRobotOrientation(
-                        RC.Limelights.front, poseEstimate.pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-                if (!hasSeeded) {
-                    this.hasSeeded = true;
-                }
-            }
+//             if (poseEstimate.tagCount >= 2) {
+// //                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT1);
+//                 // remember to unflip for nemo
+//                 var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
+// //                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
+//                 LimelightHelpers.SetRobotOrientation(
+//                         RC.Limelights.front, poseEstimate.pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+//                 if (!hasSeeded) {
+//                     this.hasSeeded = true;
+//                 }
+//             }
 
-        } else {
-            LimelightHelpers.PoseEstimate poseEstimate =
-                    LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
-            if (poseEstimate == null) {
-                return;
-            }
-//            LimelightHelpers.SetRobotOrientation(
-//                    RC.Limelights.front, this.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-            LimelightHelpers.SetIMUMode(RC.Limelights.front, 2);
-            if (poseEstimate.tagCount >= 2) {
-//                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT2);
-//                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
-//                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
-            }
-        }
+//         } else {
+//             LimelightHelpers.PoseEstimate poseEstimate =
+//                     LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
+//             if (poseEstimate == null) {
+//                 return;
+//             }
+// //            LimelightHelpers.SetRobotOrientation(
+// //                    RC.Limelights.front, this.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+//             LimelightHelpers.SetIMUMode(RC.Limelights.front, 2);
+//             if (poseEstimate.tagCount >= 2) {
+// //                this.setVisionMeasurementStdDevs(this.stdDevsVisionMT2);
+// //                var pose = new Pose2d(poseEstimate.pose.getTranslation(), poseEstimate.pose.getRotation());
+// //                this.addVisionMeasurement(pose, poseEstimate.timestampSeconds);
+//             }
+//         }
 
-        SmartDashboard.putBoolean("Has seeded", this.hasSeeded);
+//         SmartDashboard.putBoolean("Has seeded", this.hasSeeded);
 
-        var one = LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
-        var two = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
-        if (one != null) {
-            this.mt1.set(one.pose);
-        }
-        if (two != null) {
-            this.mt2.set(two.pose);
-        }
-        this.ctre.set(this.getState().Pose);
+//         var one = LimelightHelpers.getBotPoseEstimate_wpiBlue(RC.Limelights.front);
+//         var two = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(RC.Limelights.front);
+//         if (one != null) {
+//             this.mt1.set(one.pose);
+//         }
+//         if (two != null) {
+//             this.mt2.set(two.pose);
+//         }
+//         this.ctre.set(this.getState().Pose);
 
-        SmartDashboard.putNumber("TargetSpeed", test.Speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("current speed", this.getState().Speeds.vxMetersPerSecond);
+//         SmartDashboard.putNumber("TargetSpeed", test.Speeds.vxMetersPerSecond);
+//         SmartDashboard.putNumber("current speed", this.getState().Speeds.vxMetersPerSecond);
     }
 
     private void startSimThread() {

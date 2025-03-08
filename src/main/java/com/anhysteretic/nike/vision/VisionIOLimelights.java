@@ -11,7 +11,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class VisionIOLimelights implements VisionIO{
-    NetworkTable charlieTable = NetworkTableInstance.getDefault().getTable(RC.Limelights.front);
+    NetworkTable charlieTable = NetworkTableInstance.getDefault().getTable(RC.Limelights.frontName);
 
     RobotState robotState;
 

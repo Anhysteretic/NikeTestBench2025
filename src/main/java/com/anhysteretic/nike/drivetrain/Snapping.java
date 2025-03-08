@@ -29,15 +29,15 @@ public class Snapping extends Command {
   @Override
   public void execute() {
 
-    SmartDashboard.putNumber("Setpoint", setpoint);
-    double speed =
-        this.drivetrain.controller.calculate(LimelightHelpers.getTX(RC.Limelights.front), setpoint);
-    SmartDashboard.putNumber("NOT Clamped Output", speed);
-    speed = speed >= 0 ? Math.max(0, Math.min(speed, 8.5)) : -Math.max(0, Math.min(-speed, 8.5));
-    speed /= 8.5;
-    SmartDashboard.putNumber("Clamped Ouput", speed);
-    this.drivetrain.setControl(
-        this.drivetrain.m_robotSpeeds.withSpeeds(new ChassisSpeeds(0, speed, 0)));
+    // SmartDashboard.putNumber("Setpoint", setpoint);
+    // double speed =
+    //     this.drivetrain.controller.calculate(LimelightHelpers.getTX(RC.Limelights.front), setpoint);
+    // SmartDashboard.putNumber("NOT Clamped Output", speed);
+    // speed = speed >= 0 ? Math.max(0, Math.min(speed, 8.5)) : -Math.max(0, Math.min(-speed, 8.5));
+    // speed /= 8.5;
+    // SmartDashboard.putNumber("Clamped Ouput", speed);
+    // this.drivetrain.setControl(
+    //     this.drivetrain.m_robotSpeeds.withSpeeds(new ChassisSpeeds(0, speed, 0)));
   }
 
   @Override
