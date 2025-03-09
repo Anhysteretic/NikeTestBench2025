@@ -267,6 +267,10 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
 
     public SwerveRequest.ApplyRobotSpeeds test = new SwerveRequest.ApplyRobotSpeeds();
 
+    public ChassisSpeeds getCurrentRobotSpeeds(){
+        return this.getState().Speeds;
+    }
+
     public VisionData getVisionData(){
         var visionData = new VisionData();
         visionData.robotPose = this.getState().Pose;

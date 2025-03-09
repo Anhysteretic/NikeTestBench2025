@@ -3,6 +3,7 @@ package com.anhysteretic.nike;
 import static edu.wpi.first.units.Units.*;
 
 import com.anhysteretic.nike.constants.TunerConstants;
+import com.anhysteretic.nike.drivetrain.DriveMaintainHeading;
 import com.anhysteretic.nike.drivetrain.Drivetrain;
 import com.anhysteretic.nike.drivetrain.Snapping;
 import com.anhysteretic.nike.vision.Vision;
@@ -22,18 +23,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import java.util.function.Consumer;
 
 public class RobotContainer {
-  private double MaxSpeed =
-      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-  private double MaxAngularRate =
-      RotationsPerSecond.of(0.75)
-          .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
-  /* Setting up bindings for necessary control of the swerve drive platform */
-  private final SwerveRequest.FieldCentric drive =
-      new SwerveRequest.FieldCentric()
-          .withDeadband(MaxSpeed * 0.1)
-          .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-          .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage);
+  private double MaxSpeed =
+          TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
 
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -53,30 +45,33 @@ public class RobotContainer {
     }
   };
 
+  private final DriveMaintainHeading driveMaintainHeading;
+
   public RobotContainer() {
     this.visionIO = new VisionIOLimelights();
     this.vision = new Vision(visionIO, visionEstimateConsumer, drivetrain);
+    this.driveMaintainHeading = new DriveMaintainHeading(drivetrain, ()-> -joystick.getLeftY(), () -> -joystick.getLeftX(), () -> -joystick.getRightX());
     configureBindings();
   }
 
   private void configureBindings() {
+      drivetrain.setDefaultCommand(driveMaintainHeading);
 
-    drivetrain.setDefaultCommand(
-        // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(
-            () ->
-                drive
-                    .withVelocityX(
-                        -joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(
-                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(
-                        -joystick.getRightX()
-                            * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            ));
+//    drivetrain.setDefaultCommand(
+//        // Drivetrain will execute this command periodically
+//        drivetrain.applyRequest(
+//            () ->
+//                drive
+//                    .withVelocityX(
+//                        -joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+//                    .withVelocityY(
+//                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+//                    .withRotationalRate(
+//                        -joystick.getRightX()
+//                            * MaxAngularRate) // Drive counterclockwise with negative X (left)
+//            ));
 
     joystick.a().whileTrue(new RunCommand(() -> drivetrain.setControl(drivetrain.test.withSpeeds(testSpeeds)), drivetrain));
-
 
 //    this.joystick.rightBumper().whileTrue(new Snapping(drivetrain, true));
 //    this.joystick.leftBumper().whileTrue(new Snapping(drivetrain, false));
