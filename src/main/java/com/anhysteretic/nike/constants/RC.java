@@ -11,7 +11,7 @@ public class RC {
         return alliance.filter(value -> value == DriverStation.Alliance.Red).isPresent();
       };
 
-  public final static double LOOKBACK_TIME = 1.0;
+  public static final double LOOKBACK_TIME = 1.0;
 
   public static final RunType robotType = RunType.COMP;
 
@@ -21,7 +21,7 @@ public class RC {
     public static String frontName = "limelight-charlie";
     public static String backName = "limelight-gamma";
     // x y z roll pitch yaw
-    public static double[] frontPose = { 0.0, 0.0, 0.25, 180, 0.0, 0.0 };
+    public static double[] frontPose = {0.0, 0.0, 0.25, 180, 0.0, 0.0};
   }
 
   public enum RunType {

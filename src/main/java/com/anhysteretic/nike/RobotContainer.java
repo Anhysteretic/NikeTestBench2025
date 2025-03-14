@@ -9,23 +9,20 @@ import com.anhysteretic.nike.drivetrain.Snapping;
 import com.anhysteretic.nike.vision.Vision;
 import com.anhysteretic.nike.vision.VisionIO;
 import com.anhysteretic.nike.vision.VisionIOLimelights;
-import com.ctre.phoenix6.swerve.SwerveModule;
-import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.team254.vision.VisionFieldPoseEstimate;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
 import java.util.function.Consumer;
 
 public class RobotContainer {
 
   private double MaxSpeed =
-          TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+      TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
 
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -36,50 +33,67 @@ public class RobotContainer {
   public final VisionIO visionIO;
   public final Vision vision;
 
-  public final ChassisSpeeds testSpeeds = new ChassisSpeeds(MaxSpeed/2, 0, 0);
+  public final ChassisSpeeds testSpeeds = new ChassisSpeeds(MaxSpeed / 2, 0, 0);
 
-  public final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer = new Consumer<VisionFieldPoseEstimate>(){
-    @Override
-    public void accept(VisionFieldPoseEstimate visionFieldPoseEstimate) {
-      drivetrain.addVisionMeasurement(visionFieldPoseEstimate);
-    }
-  };
+  private final SendableChooser<Command> autoChooser;
+
+  public final Consumer<VisionFieldPoseEstimate> visionEstimateConsumer =
+      new Consumer<VisionFieldPoseEstimate>() {
+        @Override
+        public void accept(VisionFieldPoseEstimate visionFieldPoseEstimate) {
+          drivetrain.addVisionMeasurement(visionFieldPoseEstimate);
+        }
+      };
 
   private final DriveMaintainHeading driveMaintainHeading;
 
   public RobotContainer() {
     this.visionIO = new VisionIOLimelights();
     this.vision = new Vision(visionIO, visionEstimateConsumer, drivetrain);
-    this.driveMaintainHeading = new DriveMaintainHeading(drivetrain, ()-> -joystick.getLeftY(), () -> -joystick.getLeftX(), () -> -joystick.getRightX());
+    this.driveMaintainHeading =
+        new DriveMaintainHeading(
+            drivetrain,
+            () -> -joystick.getLeftY(),
+            () -> -joystick.getLeftX(),
+            () -> -joystick.getRightX());
     configureBindings();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   private void configureBindings() {
-      drivetrain.setDefaultCommand(driveMaintainHeading);
+    drivetrain.setDefaultCommand(driveMaintainHeading);
 
-//    drivetrain.setDefaultCommand(
-//        // Drivetrain will execute this command periodically
-//        drivetrain.applyRequest(
-//            () ->
-//                drive
-//                    .withVelocityX(
-//                        -joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-//                    .withVelocityY(
-//                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-//                    .withRotationalRate(
-//                        -joystick.getRightX()
-//                            * MaxAngularRate) // Drive counterclockwise with negative X (left)
-//            ));
+    //    drivetrain.setDefaultCommand(
+    //        // Drivetrain will execute this command periodically
+    //        drivetrain.applyRequest(
+    //            () ->
+    //                drive
+    //                    .withVelocityX(
+    //                        -joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y
+    // (forward)
+    //                    .withVelocityY(
+    //                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+    //                    .withRotationalRate(
+    //                        -joystick.getRightX()
+    //                            * MaxAngularRate) // Drive counterclockwise with negative X (left)
+    //            ));
 
-    joystick.a().whileTrue(new RunCommand(() -> drivetrain.setControl(drivetrain.test.withSpeeds(testSpeeds)), drivetrain));
+    joystick
+        .a()
+        .whileTrue(
+            new RunCommand(
+                () -> drivetrain.setControl(drivetrain.test.withSpeeds(testSpeeds)), drivetrain));
 
-//    this.joystick.rightBumper().whileTrue(new Snapping(drivetrain, true));
-//    this.joystick.leftBumper().whileTrue(new Snapping(drivetrain, false));
+    this.joystick.rightBumper().whileTrue(new Snapping(drivetrain, true));
+    this.joystick.leftBumper().whileTrue(new Snapping(drivetrain, false));
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return autoChooser.getSelected();
+    //    return Commands.print("No autonomous command configured");
   }
 }

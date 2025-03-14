@@ -113,12 +113,12 @@ task(replayWatch, type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-spotless {
-    enforceCheck = false
-    java {
-        googleJavaFormat()
-    }
-}
+//spotless {
+//    enforceCheck = false
+//    java {
+//        googleJavaFormat()
+//    }
+//}
 
 project.compileJava.dependsOn(createVersionFile)
 gversion {

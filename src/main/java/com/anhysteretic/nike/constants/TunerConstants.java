@@ -28,24 +28,24 @@ public class TunerConstants {
 
   // The steer motor uses any SwerveModule.SteerRequestType control request with the
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
-//  private static final Slot0Configs steerGains =
-//      new Slot0Configs()
-//          .withKP(100)
-//          .withKI(0)
-//          .withKD(0.5)
-//          .withKS(0.1)
-//          .withKV(2.66)
-//          .withKA(0)
-//          .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
+  //  private static final Slot0Configs steerGains =
+  //      new Slot0Configs()
+  //          .withKP(100)
+  //          .withKI(0)
+  //          .withKD(0.5)
+  //          .withKS(0.1)
+  //          .withKV(2.66)
+  //          .withKA(0)
+  //          .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
   private static final Slot0Configs steerGains =
-          new Slot0Configs()
-                  .withKP(57.286)
-                  .withKI(0)
-                  .withKD(3.7808)
-                  .withKS(0.13536)
-                  .withKV(2.3871)
-                  .withKA(0.10277)
-                  .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
+      new Slot0Configs()
+          .withKP(57.286)
+          .withKI(0)
+          .withKD(3.7808)
+          .withKS(0.13536)
+          .withKV(2.3871)
+          .withKA(0.10277)
+          .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
@@ -56,7 +56,8 @@ public class TunerConstants {
   private static final ClosedLoopOutputType kSteerClosedLoopOutput = ClosedLoopOutputType.Voltage;
   // The closed-loop output type to use for the drive motors;
   // This affects the PID/FF gains for the drive motors
-  private static final ClosedLoopOutputType kDriveClosedLoopOutput = ClosedLoopOutputType.TorqueCurrentFOC;
+  private static final ClosedLoopOutputType kDriveClosedLoopOutput =
+      ClosedLoopOutputType.TorqueCurrentFOC;
 
   // The type of motor used for the drive motor
   private static final DriveMotorArrangement kDriveMotorType =
@@ -105,8 +106,8 @@ public class TunerConstants {
   private static final double kSteerGearRatio = 21.428571428571427;
   private static final Distance kWheelRadius = Inches.of(1.983);
 
-//  private static final boolean kInvertLeftSide = false;
-//  private static final boolean kInvertRightSide = true;
+  //  private static final boolean kInvertLeftSide = false;
+  //  private static final boolean kInvertRightSide = true;
 
   private static final boolean kInvertLeftSide = true;
   private static final boolean kInvertRightSide = false;
@@ -160,8 +161,8 @@ public class TunerConstants {
   private static final boolean kFrontLeftSteerMotorInverted = true;
   private static final boolean kFrontLeftEncoderInverted = false;
 
-//  private static final Distance kFrontLeftXPos = Inches.of(10.25);
-//  private static final Distance kFrontLeftYPos = Inches.of(10.25);
+  //  private static final Distance kFrontLeftXPos = Inches.of(10.25);
+  //  private static final Distance kFrontLeftYPos = Inches.of(10.25);
   private static final Distance kFrontLeftXPos = Inches.of(-10.25);
   private static final Distance kFrontLeftYPos = Inches.of(-10.25);
 
@@ -173,8 +174,8 @@ public class TunerConstants {
   private static final boolean kFrontRightSteerMotorInverted = true;
   private static final boolean kFrontRightEncoderInverted = false;
 
-//  private static final Distance kFrontRightXPos = Inches.of(10.25);
-//  private static final Distance kFrontRightYPos = Inches.of(-10.25);
+  //  private static final Distance kFrontRightXPos = Inches.of(10.25);
+  //  private static final Distance kFrontRightYPos = Inches.of(-10.25);
 
   private static final Distance kFrontRightXPos = Inches.of(-10.25);
   private static final Distance kFrontRightYPos = Inches.of(10.25);
@@ -187,8 +188,8 @@ public class TunerConstants {
   private static final boolean kBackLeftSteerMotorInverted = true;
   private static final boolean kBackLeftEncoderInverted = false;
 
-//  private static final Distance kBackLeftXPos = Inches.of(-10.25);
-//  private static final Distance kBackLeftYPos = Inches.of(10.25);
+  //  private static final Distance kBackLeftXPos = Inches.of(-10.25);
+  //  private static final Distance kBackLeftYPos = Inches.of(10.25);
 
   private static final Distance kBackLeftXPos = Inches.of(10.25);
   private static final Distance kBackLeftYPos = Inches.of(-10.25);
@@ -201,8 +202,8 @@ public class TunerConstants {
   private static final boolean kBackRightSteerMotorInverted = true;
   private static final boolean kBackRightEncoderInverted = false;
 
-//  private static final Distance kBackRightXPos = Inches.of(-10.25);
-//  private static final Distance kBackRightYPos = Inches.of(-10.25);
+  //  private static final Distance kBackRightXPos = Inches.of(-10.25);
+  //  private static final Distance kBackRightYPos = Inches.of(-10.25);
 
   private static final Distance kBackRightXPos = Inches.of(10.25);
   private static final Distance kBackRightYPos = Inches.of(10.25);

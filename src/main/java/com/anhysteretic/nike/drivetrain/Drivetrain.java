@@ -1,10 +1,8 @@
 package com.anhysteretic.nike.drivetrain;
 
-import com.anhysteretic.nike.lib.limelight.LimelightHelpers;
+import com.anhysteretic.nike.constants.Field;
 import com.anhysteretic.nike.constants.RC;
 import com.anhysteretic.nike.constants.TunerConstants.TunerSwerveDrivetrain;
-import com.anhysteretic.nike.vision.Vision;
-import com.anhysteretic.nike.vision.VisionIO;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -19,6 +17,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -29,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -42,14 +42,14 @@ import java.util.function.Supplier;
 public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
-  private double m_lastSimTime;
+    private double m_lastSimTime;
 
-  /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
-  private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
-  /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
-  private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
-  /* Keep track if we've ever applied the operator perspective before or not */
-  private boolean m_hasAppliedOperatorPerspective = false;
+    /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
+    private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
+    /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
+    private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
+    /* Keep track if we've ever applied the operator perspective before or not */
+    private boolean m_hasAppliedOperatorPerspective = false;
 
     public PIDController controller = new PIDController(0.5, 0, 0);
     public final SwerveRequest.ApplyRobotSpeeds m_robotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
@@ -68,6 +68,8 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     StructPublisher<Pose2d> mt2 =
             networkTablePoses.getStructTopic("Megatag 2", Pose2d.struct).publish();
     StructPublisher<Pose2d> ctre = networkTablePoses.getStructTopic("CTRE", Pose2d.struct).publish();
+
+    Field2d field = new Field2d();
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -173,6 +175,8 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             DriverStation.reportError(
                     "Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
         }
+
+        SmartDashboard.putData("CTRE ROBOT POSE FIELD", this.field);
     }
 
     /**
@@ -188,22 +192,22 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     @Override
     public void periodic() {
 
-         if (DriverStation.isDisabled()) {
-             if (!m_hasAppliedOperatorPerspective) {
-                 DriverStation.getAlliance()
-                         .ifPresent(
-                                 allianceColor -> {
-                                     setOperatorPerspectiveForward(
-                                             allianceColor == Alliance.Red
-                                                     ? kRedAlliancePerspectiveRotation
-                                                     : kBlueAlliancePerspectiveRotation);
-                                     m_hasAppliedOperatorPerspective = true;
-                                 });
-             }
-         }
+        if (DriverStation.isDisabled()) {
+            if (!m_hasAppliedOperatorPerspective) {
+                DriverStation.getAlliance()
+                        .ifPresent(
+                                allianceColor -> {
+                                    setOperatorPerspectiveForward(
+                                            allianceColor == Alliance.Red
+                                                    ? kRedAlliancePerspectiveRotation
+                                                    : kBlueAlliancePerspectiveRotation);
+                                    m_hasAppliedOperatorPerspective = true;
+                                });
+            }
+        }
 
-
-         ctre.set(this.getState().Pose);
+        ctre.set(this.getState().Pose);
+        this.field.setRobotPose(this.getState().Pose);
     }
 
     private void startSimThread() {
@@ -220,6 +224,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
                             /* use the measured time delta, get battery voltage from WPILib */
                             updateSimState(deltaTime, RobotController.getBatteryVoltage());
                         });
+
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
@@ -257,40 +262,58 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
                 visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
 
-    public void addVisionMeasurement(VisionFieldPoseEstimate estimate){
+    public void addVisionMeasurement(VisionFieldPoseEstimate estimate) {
         if (estimate.getVisionMeasurementStdDevs() == null) {
             addVisionMeasurement(estimate.getVisionRobotPoseMeters(), estimate.getTimestampSeconds());
         } else {
-            addVisionMeasurement(estimate.getVisionRobotPoseMeters(), estimate.getTimestampSeconds(), estimate.getVisionMeasurementStdDevs());
+            addVisionMeasurement(
+                    estimate.getVisionRobotPoseMeters(),
+                    estimate.getTimestampSeconds(),
+                    estimate.getVisionMeasurementStdDevs());
         }
     }
 
     public SwerveRequest.ApplyRobotSpeeds test = new SwerveRequest.ApplyRobotSpeeds();
 
-    public ChassisSpeeds getCurrentRobotSpeeds(){
+    public ChassisSpeeds getCurrentRobotSpeeds() {
         return this.getState().Speeds;
     }
 
-    public VisionData getVisionData(){
+    public VisionData getVisionData() {
         var visionData = new VisionData();
         visionData.robotPose = this.getState().Pose;
         visionData.gyroRotation = this.getState().Pose.getRotation();
         visionData.measuredRobotRelativeChassisSpeeds = this.getState().Speeds;
-//        visionData.measuredFieldRelativeChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(visionData.measuredRobotRelativeChassisSpeeds, visionData.gyroRotation);
+        //        visionData.measuredFieldRelativeChassisSpeeds =
+        // ChassisSpeeds.fromRobotRelativeSpeeds(visionData.measuredRobotRelativeChassisSpeeds,
+        // visionData.gyroRotation);
 
         visionData.yawRadsPers = this.getState().Speeds.omegaRadiansPerSecond;
         return visionData;
-
-
     }
 
-    public static class VisionData{
+    public static class VisionData {
         public Pose2d robotPose;
         public Rotation2d gyroRotation;
         public ChassisSpeeds measuredRobotRelativeChassisSpeeds;
-//        public ChassisSpeeds measuredFieldRelativeChassisSpeeds;
-//        public ChassisSpeeds desiredFieldRelativeChassisSpeeds;
+        //        public ChassisSpeeds measuredFieldRelativeChassisSpeeds;
+        //        public ChassisSpeeds desiredFieldRelativeChassisSpeeds;
         public double yawRadsPers;
-
     }
+
+    public double getAngleToReefPolar() {
+        boolean isRed = RC.isRedAlliance.get();
+        Translation2d robotVector;
+
+        if (isRed)
+            robotVector =
+                    this.getState().Pose.getTranslation().minus(Field.Positions.Reef.redTranslation2d);
+        else
+            robotVector =
+                    this.getState().Pose.getTranslation().minus(Field.Positions.Reef.blueTranslation2d);
+
+        return Math.atan2(robotVector.getY(), robotVector.getX());
+    }
+
+
 }
